@@ -3,9 +3,10 @@ package server
 import (
 	"executor/router"
 	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
-	"net/http"
 )
 
 func RunServer() {

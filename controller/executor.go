@@ -2,10 +2,11 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 	"net/url"
 	"os"
+
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
 func ReadS3(s3Addr, objectName string) {
