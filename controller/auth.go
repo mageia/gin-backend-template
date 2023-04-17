@@ -32,6 +32,30 @@ func Register(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "registration success"})
 }
 
-func Login(c *gin.Context) {}
+type LoginInput struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+func Login(c *gin.Context) {
+	var input LoginInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(400, gin.H{"message": err.Error()})
+		return
+	}
+
+	u := models.User{
+		Username: input.Username,
+		Password: input.Password,
+	}
+
+	token, err := models.LoginCheck(u.Username, u.Password)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token})
+}
 
 func Logout(c *gin.Context) {}

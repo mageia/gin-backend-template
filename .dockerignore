@@ -1,5 +1,6 @@
+.git
+.github
 vendor
 .idea
 .vscode
 *.db
-api-server

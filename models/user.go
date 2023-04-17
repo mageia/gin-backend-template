@@ -1,6 +1,7 @@
 package models
 
 import (
+	"api-server/auth_jwt"
 	"html"
 	"strings"
 
@@ -36,3 +37,23 @@ func (u* User) BeforeSave(*gorm.DB) error {
 
   return nil
 }
+
+
+func LoginCheck(username, password string)  (string ,error){
+  var u User
+  if DB.Model(User{}).Where("username = ?", username).First(&u).Error != nil {
+    return "", gorm.ErrRecordNotFound
+  }
+
+  if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)); err != nil {
+    return "", err
+  }
+
+  token, err := auth_jwt.GenerateToken(u.ID)
+  if err != nil {
+    return "", err
+  }
+
+  return token, nil
+}
+
