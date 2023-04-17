@@ -1,7 +1,7 @@
 package router
 
 import (
-	"executor/controller"
+	"api-server/controller"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -21,8 +21,10 @@ func InitRouter() *gin.Engine {
 
 	router.GET("/healthz", controller.Health)
 
-	router.POST("/executor", controller.Executor)
-	router.POST("/importer", controller.Importer)
+	api := router.Group("/api/v1")
+	api.POST("/login", controller.Login)
+	api.POST("/register", controller.Register)
+	api.POST("/logout", controller.Logout)
 
 	return router
 }
