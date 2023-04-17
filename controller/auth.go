@@ -1,11 +1,27 @@
 package controller
 
 import (
+	"api-server/auth_jwt"
 	"api-server/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
+
+func CurrentUser(c *gin.Context) {
+	userId, err := auth_jwt.ExtractTokenID(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	u, err := models.GetUserById(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user": u})
+}
 
 type RegisterInput struct {
 	Username string `json:"username" binding:"required"`

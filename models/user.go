@@ -26,6 +26,16 @@ func (u *User) SaveUser() (*User, error) {
   return u, nil
 }
 
+func GetUserById(id uint) (*User, error) {
+  var u User
+  if e := DB.First(&u, id).Error; e != nil {
+    return nil, e
+  }
+  u.Password = "***************"
+
+  return &u, nil
+}
+
 func (u* User) BeforeSave(*gorm.DB) error {
   hashedPass, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
   if err != nil {

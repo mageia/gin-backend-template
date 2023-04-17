@@ -2,6 +2,7 @@ package router
 
 import (
 	"api-server/controller"
+	"api-server/middlewares"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -25,6 +26,10 @@ func InitRouter() *gin.Engine {
 	api.POST("/login", controller.Login)
 	api.POST("/register", controller.Register)
 	api.POST("/logout", controller.Logout)
+
+	admin := router.Group("/api/v1/admin")
+	admin.Use(middlewares.JwtAuthMiddleware())
+	admin.GET("/user", controller.CurrentUser)
 
 	return router
 }
