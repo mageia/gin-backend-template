@@ -4,6 +4,7 @@ import (
 	"api-server/auth_jwt"
 	"api-server/config"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -22,7 +23,7 @@ func JwtAuthMiddleware() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			c.JSON(401, gin.H{"error": "Unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
 			c.Abort()
 			return
 		}

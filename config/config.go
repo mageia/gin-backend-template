@@ -9,7 +9,7 @@ import (
 
 var (
 	// API_SECRET is the secret key used to sign the JWT
-	API_SECRET string = "mysecret"
+	API_SECRET string = "Rst$qSCiyv7bJTttZ7ht8reyTsB8jv@Q"
 
 	//TOKEN_HOUR_LIFESPAN is the second the token will be valid for
 	TOKEN_HOUR_LIFESPAN int = 3600 * 24

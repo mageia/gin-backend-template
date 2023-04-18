@@ -1,27 +1,12 @@
 package controller
 
 import (
-	"api-server/auth_jwt"
 	"api-server/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
-
-func CurrentUser(c *gin.Context) {
-	userId, err := auth_jwt.ExtractTokenID(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	u, err := models.GetUserById(userId)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"user": u})
-}
 
 type RegisterInput struct {
 	Username string `json:"username" binding:"required"`
@@ -40,8 +25,8 @@ func Register(c *gin.Context) {
 		Password: input.Password,
 	}
 
-	if _, err := u.SaveUser(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if e := models.DB.Create(&u).Error; e != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": e.Error()})
 		return
 	}
 
@@ -56,22 +41,20 @@ type LoginInput struct {
 func Login(c *gin.Context) {
 	var input LoginInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(400, gin.H{"message": err.Error()})
+		log.Error().Err(err).Msg("ShouldBindJSON")
+		c.JSON(400, gin.H{"message": "Check Login Input failed"})
 		return
 	}
 
-	u := models.User{
-		Username: input.Username,
-		Password: input.Password,
-	}
-
+	u := models.User{Username: input.Username, Password: input.Password}
 	token, err := models.LoginCheck(u.Username, u.Password)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Error().Err(err).Msg("LoginCheck")
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid username or password"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, gin.H{"access_token": token})
 }
 
 func Logout(c *gin.Context) {}

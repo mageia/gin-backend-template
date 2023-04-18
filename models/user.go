@@ -13,27 +13,9 @@ type User struct {
 	gorm.Model
 
 	Username string `gorm:"uniqueIndex;not null"`
-	Password string `gorm:"not null"`
+	Password string `gorm:"not null" json:"-"`
 	Email    string `gorm:"uniqueIndex;not null"`
 	Avatar   string
-}
-
-func (u *User) SaveUser() (*User, error) {
-  if e := DB.Create(&u).Error; e != nil {
-    return nil, e
-  }
-
-  return u, nil
-}
-
-func GetUserById(id uint) (*User, error) {
-  var u User
-  if e := DB.First(&u, id).Error; e != nil {
-    return nil, e
-  }
-  u.Password = "***************"
-
-  return &u, nil
 }
 
 func (u* User) BeforeSave(*gorm.DB) error {
@@ -48,10 +30,9 @@ func (u* User) BeforeSave(*gorm.DB) error {
   return nil
 }
 
-
 func LoginCheck(username, password string)  (string ,error){
   var u User
-  if DB.Model(User{}).Where("username = ?", username).First(&u).Error != nil {
+  if DB.Model(User{}).Where("username = ?", username).Or("email = ?", username).First(&u).Error != nil {
     return "", gorm.ErrRecordNotFound
   }
 

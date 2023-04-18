@@ -10,26 +10,32 @@ import (
 
 func InitRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
-	router := gin.Default()
-	router.Use(gzip.Gzip(gzip.DefaultCompression))
+	r := gin.Default()
+	r.Use(gzip.Gzip(gzip.DefaultCompression))
 
-	router.Use(func(c *gin.Context) {
-		c.Next()
+	r.Use(func(c *gin.Context) {
 		if len(c.Errors) != 0 {
-			c.AbortWithStatusJSON(400, gin.H{"code": "failed", "message": c.Errors.String()})
+			c.AbortWithStatusJSON(400, gin.H{"message": c.Errors.String()})
+			return
 		}
+
+		c.Next()
 	})
 
-	router.GET("/healthz", controller.Health)
+	r.GET("/healthz", controller.Health)
 
-	api := router.Group("/api/v1")
-	api.POST("/login", controller.Login)
-	api.POST("/register", controller.Register)
-	api.POST("/logout", controller.Logout)
+	api := r.Group("/api/v1")
 
-	admin := router.Group("/api/v1/admin")
+	auth := api.Group("/auth")
+	auth.POST("/login", controller.Login)
+	auth.POST("/register", controller.Register)
+	auth.POST("/logout", controller.Logout)
+
+	admin := api.Group("/admin")
 	admin.Use(middlewares.JwtAuthMiddleware())
-	admin.GET("/user", controller.CurrentUser)
 
-	return router
+	admin.GET("/user", controller.RetrieveCurrentUser)
+	admin.PUT("/user", controller.UpdateCurrentUser)
+
+	return r
 }
