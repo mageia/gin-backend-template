@@ -19,7 +19,7 @@ func JwtAuthMiddleware() gin.HandlerFunc {
 				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
 
-			return []byte(config.API_SECRET), nil
+			return []byte(config.G.Auth.ApiSecret), nil
 		})
 
 		if err != nil {

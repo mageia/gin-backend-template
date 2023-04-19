@@ -1,39 +1,66 @@
 package config
 
 import (
+	"fmt"
 	"os"
-	"strconv"
+	"path"
+	"strings"
+	"time"
+
+	"github.com/spf13/viper"
 
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
-var (
-	// API_SECRET is the secret key used to sign the JWT
-	API_SECRET string = "Rst$qSCiyv7bJTttZ7ht8reyTsB8jv@Q"
+var G Config
 
-	//TOKEN_HOUR_LIFESPAN is the second the token will be valid for
-	TOKEN_HOUR_LIFESPAN int = 3600 * 24
+type Config struct {
+	Port int `mapstructure:"listen_port"`
 
-	// LOG_LEVEL is the log level, valid values are "debug", "info", "warn", "error", "fatal", "panic"
-	LOG_LEVEL = zerolog.InfoLevel
-)
+	Log struct {
+		Level string `mapstructure:"level"`
+	} `mapstructure:"log"`
+
+	Auth struct {
+		ApiSecret   string `mapstructure:"api_secret"`
+		TokenExpire int    `mapstructure:"token_expire"`
+	} `mapstructure:"auth"`
+
+	DB struct {
+		Type string `mapstructure:"type"`
+		URL  string `mapstructure:"url"`
+	} `mapstructure:"db"`
+}
 
 func init() {
-	if os.Getenv("API_SECRET") != "" {
-		API_SECRET = os.Getenv("API_SECRET")
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+	viper.SetConfigType("toml")
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	if e := viper.ReadInConfig(); e != nil {
+		log.Fatal().Err(e).Msg(fmt.Sprintf("Config file not found: %s", viper.ConfigFileUsed()))
 	}
 
-	if os.Getenv("TOKEN_HOUR_LIFESPAN") != "" {
-		if t, e := strconv.Atoi(os.Getenv("TOKEN_HOUR_LIFESPAN")); e == nil {
-			TOKEN_HOUR_LIFESPAN = t
-		}
+	if e := viper.Unmarshal(&G); e != nil {
+		log.Fatal().Err(e).Msg("Error reading config file")
 	}
 
-	switch os.Getenv("LOG_LEVEL") {
+	log.Logger = zerolog.New(zerolog.ConsoleWriter{
+		Out:        os.Stderr,
+		TimeFormat: time.RFC3339,
+		FormatCaller: func(i interface{}) string {
+			_, f := path.Split(i.(string))
+			return "[" + fmt.Sprintf("%-20s", f) + "]"
+		},
+	}).With().Caller().Timestamp().Stack().Logger()
+
+	LOG_LEVEL := zerolog.InfoLevel
+	switch G.Log.Level {
 	case "debug":
 		LOG_LEVEL = zerolog.DebugLevel
-	case "info":
-		LOG_LEVEL = zerolog.InfoLevel
 	case "warn":
 		LOG_LEVEL = zerolog.WarnLevel
 	case "error":
@@ -42,7 +69,6 @@ func init() {
 		LOG_LEVEL = zerolog.FatalLevel
 	case "panic":
 		LOG_LEVEL = zerolog.PanicLevel
-	default:
-		LOG_LEVEL = zerolog.InfoLevel
 	}
+	zerolog.SetGlobalLevel(LOG_LEVEL)
 }

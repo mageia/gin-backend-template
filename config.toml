@@ -1,0 +1,12 @@
+listen_port = 9999
+
+[auth]
+api_secret = "Rst$qSCiyv7bJTttZ7ht8reyTsB8jv@Q"
+token_expire = 86400
+
+[log]
+level = "info"
+
+[db]
+url = "sqlite:///test.db"
+type = "sqlite"

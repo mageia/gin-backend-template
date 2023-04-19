@@ -14,11 +14,11 @@ func GenerateToken(userId uint) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["user_id"] = userId
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(config.TOKEN_HOUR_LIFESPAN)).Unix()
+	claims["exp"] = time.Now().Add(time.Hour * time.Duration(config.G.Auth.TokenExpire)).Unix()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	return token.SignedString([]byte(config.API_SECRET))
+	return token.SignedString([]byte(config.G.Auth.ApiSecret))
 }
 
 func ExtractToken(c *gin.Context) string {
@@ -38,7 +38,7 @@ func ExtractTokenID(c *gin.Context) (uint, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"])
 		}
-		return []byte(config.API_SECRET), nil
+		return []byte(config.G.Auth.ApiSecret), nil
 	})
 	if err != nil {
 		return 0, err

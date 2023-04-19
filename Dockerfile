@@ -6,7 +6,7 @@ ENV GOPROXY=https://goproxy.cn
 COPY . .
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
 RUN apk add --no-cache --virtual .build-deps ca-certificates gcc g++
-RUN go build -o api-server -ldflags="-X 'main.Version=${COMMIT}'"
+RUN go build -o api-server
 
 FROM alpine
 WORKDIR /app

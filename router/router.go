@@ -9,10 +9,9 @@ import (
 )
 
 func InitRouter() *gin.Engine {
-	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-	r.Use(gzip.Gzip(gzip.DefaultCompression))
 
+	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.Use(func(c *gin.Context) {
 		if len(c.Errors) != 0 {
 			c.AbortWithStatusJSON(400, gin.H{"message": c.Errors.String()})
@@ -33,7 +32,6 @@ func InitRouter() *gin.Engine {
 
 	admin := api.Group("/admin")
 	admin.Use(middlewares.JwtAuthMiddleware())
-
 	admin.GET("/user", controller.RetrieveCurrentUser)
 	admin.PUT("/user", controller.UpdateCurrentUser)
 
