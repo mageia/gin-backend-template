@@ -21,7 +21,7 @@ func InitRouter() *gin.Engine {
 		c.Next()
 	})
 
-	r.GET("/healthz", controller.Health)
+	r.GET("/healthz", func(c *gin.Context) { c.String(200, "ok") })
 
 	api := r.Group("/api/v1")
 
