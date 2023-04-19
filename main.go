@@ -4,9 +4,4 @@ import (
 	"api-server/server"
 )
 
-func main() {
-	server.RunServer()
-}
-
-func init() {
-}
+func main() { server.RunServer() }

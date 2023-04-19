@@ -1,15 +1,15 @@
 package controller
 
 import (
-	"api-server/auth_jwt"
 	"api-server/models"
+	"api-server/token"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func RetrieveCurrentUser(c *gin.Context) {
-	userId, err := auth_jwt.ExtractTokenID(c)
+	userId, err := token.ExtractTokenID(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -29,7 +29,7 @@ type UpdateUserInput struct {
 }
 
 func UpdateCurrentUser(c *gin.Context) {
-	userId, err := auth_jwt.ExtractTokenID(c)
+	userId, err := token.ExtractTokenID(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return

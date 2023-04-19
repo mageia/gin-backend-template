@@ -1,7 +1,7 @@
 package models
 
 import (
-	"api-server/auth_jwt"
+	"api-server/token"
 	"html"
 	"strings"
 
@@ -40,7 +40,7 @@ func LoginCheck(username, password string)  (string ,error){
     return "", err
   }
 
-  token, err := auth_jwt.GenerateToken(u.ID)
+  token, err := token.GenerateToken(u.ID)
   if err != nil {
     return "", err
   }

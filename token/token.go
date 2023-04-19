@@ -1,4 +1,4 @@
-package auth_jwt
+package token
 
 import (
 	"api-server/config"

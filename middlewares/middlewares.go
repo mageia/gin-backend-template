@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"api-server/auth_jwt"
 	"api-server/config"
+	"api-server/token"
 	"fmt"
 	"net/http"
 
@@ -12,7 +12,7 @@ import (
 
 func JwtAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := auth_jwt.ExtractToken(c)
+		tokenString := token.ExtractToken(c)
 
 		_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
