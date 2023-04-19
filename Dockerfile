@@ -11,6 +11,7 @@ RUN go build -o api-server
 FROM alpine
 WORKDIR /app
 COPY --from=builder /app/api-server .
+COPY --from=builder /app/config.toml .
 RUN chmod +x ./api-server
 EXPOSE 9999
 
