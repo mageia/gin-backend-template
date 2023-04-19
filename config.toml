@@ -9,4 +9,4 @@ level = "info"
 
 [db]
 url = "sqlite:///test.db"
-type = "sqlite"
+type = "sqlite3"

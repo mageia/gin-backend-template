@@ -4,22 +4,10 @@ import (
 	"api-server/config"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
-
-func GenerateToken(userId uint) (string, error) {
-	claims := jwt.MapClaims{}
-	claims["authorized"] = true
-	claims["user_id"] = userId
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(config.G.Auth.TokenExpire)).Unix()
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	return token.SignedString([]byte(config.G.Auth.ApiSecret))
-}
 
 func ExtractToken(c *gin.Context) string {
 	token := c.Query("access_token")

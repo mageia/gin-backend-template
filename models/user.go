@@ -1,17 +1,22 @@
 package models
 
 import (
-	"api-server/token"
+	"api-server/config"
 	"html"
 	"strings"
+	"time"
 
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type User struct {
-	gorm.Model
+	ID        uint `gorm:"primarykey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 
+  Role string `gorm:"not null;default:'user'"`
 	Username string `gorm:"uniqueIndex;not null"`
 	Password string `gorm:"not null" json:"-"`
 	Email    string `gorm:"uniqueIndex;not null"`
@@ -40,11 +45,34 @@ func LoginCheck(username, password string)  (string ,error){
     return "", err
   }
 
-  token, err := token.GenerateToken(u.ID)
+  token, err := GenerateToken(&u)
   if err != nil {
     return "", err
   }
 
   return token, nil
+}
+
+
+type Claims struct {
+	UserId   uint   `json:"user_id"`
+	Username string `json:"username"`
+	Role     string `json:"role"`
+	jwt.StandardClaims
+}
+
+func GenerateToken(u *User) (string, error) {
+	claims := Claims{
+		UserId:   u.ID,
+		Username: u.Username,
+		Role:     u.Role,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Second * time.Duration(config.G.Auth.TokenExpire)).Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	return token.SignedString([]byte(config.G.Auth.ApiSecret))
 }
 

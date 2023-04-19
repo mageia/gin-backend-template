@@ -57,4 +57,4 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"access_token": token})
 }
 
-func Logout(c *gin.Context) {}
+func Logout(c *gin.Context) { c.JSON(200, gin.H{"message": "logout success"}) }
