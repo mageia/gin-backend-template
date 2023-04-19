@@ -12,6 +12,8 @@ import (
 var DB *gorm.DB
 
 func GetEnforcer() (*casbin.Enforcer, error) {
+	var e *casbin.Enforcer
+
 	a, err := adapter.NewAdapterByDB(DB)
 	if err != nil {
 		log.Error().Err(err).Msg("NewAdapter")
@@ -32,21 +34,28 @@ func GetEnforcer() (*casbin.Enforcer, error) {
     e = some(where (p.eft == allow))
     
     [matchers]
-    m = g(r.sub, p.sub) && keyMatch(r.obj, p.obj) && (r.act == p.act || p.act == "*")
+    m = g(r.sub, p.sub) && keyMatch(r.obj, p.obj) && (r.act == p.act || p.act == "*") || r.sub == "admin"
   `)
 	if err != nil {
 		log.Error().Err(err).Msg("NewModelFromString")
 		return nil, err
 	}
 
-	e, err := casbin.NewEnforcer(m, a)
+	e, err = casbin.NewEnforcer(m, a)
 	if err != nil {
 		log.Error().Err(err).Msg("NewEnforcer")
 		return nil, err
 	}
 
-	_, _ = e.AddPolicy("admin", "*", "*")
-	_, _ = e.AddPolicy("user", "/*/logout", "POST")
+	if err = e.GetAdapter().(*adapter.Adapter).Transaction(e, func(e casbin.IEnforcer) error {
+		if _, err = e.AddPolicy("user", "/*/logout", "POST"); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		log.Error().Err(err).Msg("Transaction")
+		return nil, err
+	}
 
 	if err = e.LoadPolicy(); err != nil {
 		log.Error().Err(err).Msg("LoadPolicy")

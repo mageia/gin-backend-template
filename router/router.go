@@ -42,5 +42,10 @@ func InitRouter() *gin.Engine {
 	admin.GET("/user", controller.RetrieveCurrentUser)
 	admin.PUT("/user", controller.UpdateCurrentUser)
 
+	admin.POST("/policies", controller.PostPolicy)
+	admin.GET("/policies", controller.GetPolicy)
+	admin.PUT("/policies", controller.PutPolicy)
+	admin.DELETE("/policies", controller.DelPolicy)
+
 	return r
 }
