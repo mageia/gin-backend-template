@@ -1,10 +1,15 @@
 package models
 
 import (
+	"api-server/config"
+	"net/url"
+
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	adapter "github.com/casbin/gorm-adapter/v3"
 	"github.com/rs/zerolog/log"
+	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -66,10 +71,24 @@ func GetEnforcer() (*casbin.Enforcer, error) {
 }
 
 func init() {
-	var err error
-	DB, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	u, err := url.Parse(config.G.DB.URL)
 	if err != nil {
-		log.Error().Err(err).Msg("gorm.Open")
+		log.Fatal().Err(err).Str("db", config.G.DB.URL).Msg("url.Parse")
+	}
+
+	var dialector gorm.Dialector
+	switch u.Scheme {
+	case "sqlite":
+		dialector = sqlite.Open(u.Host)
+	case "postgres":
+		dialector = postgres.Open(config.G.DB.URL)
+	default:
+		dialector = mysql.Open(config.G.DB.URL)
+	}
+
+	DB, err = gorm.Open(dialector, &gorm.Config{})
+	if err != nil {
+		log.Fatal().Err(err).Msg("gorm.Open")
 	}
 
 	if err = DB.AutoMigrate(&User{}); err != nil {

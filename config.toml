@@ -8,5 +8,11 @@ token_expire = 86400
 level = "info"
 
 [db]
-url = "sqlite:///test.db"
-type = "sqlite3"
+# sqlite
+url = "sqlite://test.db"
+
+# postgres
+# url = "postgres://postgres:postgres@192.168.16.110:5432/postgres"
+
+# mysql
+# url = "root:root@tcp(192.168.16.110:3306)/test"
