@@ -28,7 +28,7 @@ require (
 	github.com/spf13/viper v1.15.0
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/crypto v0.8.0
+	golang.org/x/crypto v0.9.0
 	google.golang.org/protobuf v1.30.0 // indirect
 	gorm.io/driver/mysql v1.5.0
 	gorm.io/driver/postgres v1.5.0
