@@ -30,11 +30,11 @@ require (
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/crypto v0.8.0
 	google.golang.org/protobuf v1.30.0 // indirect
-	gorm.io/driver/mysql v1.5.0
+	gorm.io/driver/mysql v1.5.1
 	gorm.io/driver/postgres v1.5.0
 	gorm.io/driver/sqlite v1.5.0
 	gorm.io/driver/sqlserver v1.4.3 // indirect
-	gorm.io/gorm v1.25.0
+	gorm.io/gorm v1.25.1
 	gorm.io/plugin/dbresolver v1.4.1 // indirect
 	modernc.org/sqlite v1.22.0 // indirect
 )
