@@ -34,7 +34,7 @@ require (
 	gorm.io/driver/postgres v1.5.0
 	gorm.io/driver/sqlite v1.5.0
 	gorm.io/driver/sqlserver v1.4.3 // indirect
-	gorm.io/gorm v1.25.0
+	gorm.io/gorm v1.25.2
 	gorm.io/plugin/dbresolver v1.4.1 // indirect
 	modernc.org/sqlite v1.22.0 // indirect
 )
