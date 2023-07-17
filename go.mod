@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/bytedance/sonic v1.8.7 // indirect
-	github.com/casbin/casbin/v2 v2.68.0
+	github.com/casbin/casbin/v2 v2.72.0
 	github.com/casbin/gorm-adapter/v3 v3.16.1
 	github.com/frankban/quicktest v1.14.5 // indirect
 	github.com/gin-contrib/gzip v0.0.6
