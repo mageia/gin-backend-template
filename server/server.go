@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	zerolog "github.com/philip-bui/grpc-zerolog"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -24,7 +25,7 @@ func RunServer() {
 	log.Info().Msgf("Swagger docs at %s/swagger/index.html", url)
 	log.Info().Msg("Press Ctrl+C to quit")
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(zerolog.UnaryInterceptor())
 	rpc.RegisterHelloWroldServer(grpcServer, &service.HelloWorld{})
 	reflection.Register(grpcServer)
 
