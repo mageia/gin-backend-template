@@ -3,6 +3,7 @@ package models
 import (
 	"api-server/config"
 	"net/url"
+	"path"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
@@ -52,12 +53,7 @@ func GetEnforcer() (*casbin.Enforcer, error) {
 		return nil, err
 	}
 
-	if err = e.GetAdapter().(*adapter.Adapter).Transaction(e, func(e casbin.IEnforcer) error {
-		if _, err = e.AddPolicy("user", "/*/logout", "POST"); err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
+	if err = e.GetAdapter().(*adapter.Adapter).Transaction(e, func(e casbin.IEnforcer) error { return nil }); err != nil {
 		log.Error().Err(err).Msg("Transaction")
 		return nil, err
 	}
@@ -78,12 +74,12 @@ func init() {
 
 	var dialector gorm.Dialector
 	switch u.Scheme {
-	case "sqlite":
-		dialector = sqlite.Open(u.Host)
+	case "mysql":
+		dialector = mysql.Open(config.G.DB.URL)
 	case "postgres":
 		dialector = postgres.Open(config.G.DB.URL)
-	default:
-		dialector = mysql.Open(config.G.DB.URL)
+	case "sqlite":
+		dialector = sqlite.Open(path.Join(u.Host, u.Path))
 	}
 
 	DB, err = gorm.Open(dialector, &gorm.Config{})
@@ -91,14 +87,14 @@ func init() {
 		log.Fatal().Err(err).Msg("gorm.Open")
 	}
 
-	if err = DB.AutoMigrate(&User{}); err != nil {
-		log.Error().Err(err).Msg("AutoMigrate")
-	}
+	go func() {
+		if err = DB.AutoMigrate(&User{}); err != nil {
+			log.Error().Err(err).Msg("AutoMigrate")
+		}
+		InitData()
+	}()
+}
 
-	DB.Model(&User{}).FirstOrCreate(&User{
-		Username: "admin",
-		Password: "admin",
-		Role:     "admin",
-		Email:    "yzg963@gmail.com",
-	}, User{Username: "admin"})
+func InitData() {
+	DB.Model(&User{}).FirstOrCreate(&User{Username: "admin", Password: "admin", Role: "admin", Email: "yzg963@gmail.com"}, User{Username: "admin"})
 }

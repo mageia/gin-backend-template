@@ -1,4 +1,4 @@
-package middlewares
+package middleware
 
 import (
 	"api-server/config"
@@ -12,7 +12,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func JwtAuthMiddleware(e *casbin.Enforcer) gin.HandlerFunc {
+func JwtAuth(e *casbin.Enforcer) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.Query("access_token")
 		if tokenString == "" {

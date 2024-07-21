@@ -16,7 +16,8 @@ import (
 var G Config
 
 type Config struct {
-	Port int `mapstructure:"listen_port"`
+	Host string `mapstructure:"listen_host"`
+	Port int    `mapstructure:"listen_port"`
 
 	Log struct {
 		Level string `mapstructure:"level"`

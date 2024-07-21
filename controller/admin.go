@@ -3,22 +3,22 @@ package controller
 import (
 	"api-server/models"
 	"api-server/token"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 )
 
 func RetrieveCurrentUser(c *gin.Context) {
 	userId, err := token.ExtractTokenID(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.Error(err)
 		return
 	}
 
 	var u models.User
 	if e := models.DB.First(&u, userId).Error; e != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": e.Error()})
+		c.Error(e)
 		return
 	}
 
@@ -32,29 +32,32 @@ type UpdateUserInput struct {
 func UpdateCurrentUser(c *gin.Context) {
 	userId, err := token.ExtractTokenID(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.Error(err)
 		return
 	}
 
 	var input UpdateUserInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(400, gin.H{"message": err.Error()})
+		c.Error(err)
 		return
 	}
 
 	if input.Avatar == nil {
 		c.JSON(200, gin.H{"message": "Nothing to do"})
+		c.Error(err)
 		return
 	}
 
 	var u models.User
 	if e := models.DB.First(&u, userId).Error; e != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": e.Error()})
+		c.Error(err)
 		return
 	}
 
 	if e := models.DB.Model(&u).Update("avatar", *input.Avatar).Error; e != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": e.Error()})
+		c.Error(err)
 		return
 	}
 
@@ -70,15 +73,13 @@ type Policy struct {
 func PostPolicy(c *gin.Context) {
 	var policy Policy
 	if err := c.ShouldBindJSON(&policy); err != nil {
-		log.Error().Err(err).Msg("ShouldBindJSON")
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Check policy input failed"})
+		c.Error(errors.New("Check policy input failed"))
 		return
 	}
 
 	e, _ := models.GetEnforcer()
 	if ok, err := e.AddPolicy(policy.Sub, policy.Obj, policy.Act); !ok || err != nil {
-		log.Error().Bool("ok", ok).Err(err).Msg("AddPolicy")
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Add policy failed"})
+		c.Error(errors.New("Add policy failed"))
 		return
 	}
 
@@ -88,7 +89,12 @@ func PostPolicy(c *gin.Context) {
 
 func GetPolicy(c *gin.Context) {
 	e, _ := models.GetEnforcer()
-	c.JSON(http.StatusOK, gin.H{"policies": e.GetPolicy()})
+	policies, err := e.GetPolicy()
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"policies": policies})
 }
 
 func PutPolicy(c *gin.Context) {
@@ -97,8 +103,7 @@ func PutPolicy(c *gin.Context) {
 		New Policy `json:"new" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&policy); err != nil {
-		log.Error().Err(err).Msg("ShouldBindJSON")
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Check policy input failed"})
+		c.Error(errors.New("Check policy input failed"))
 		return
 	}
 	e, _ := models.GetEnforcer()
@@ -111,24 +116,23 @@ func PutPolicy(c *gin.Context) {
 		policy.New.Obj,
 		policy.New.Act,
 	}); !ok || err != nil {
-		log.Error().Err(err).Msg("UpdatePolicy")
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Update policy failed"})
+		c.Error(errors.New("Update policy failed"))
+		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{"policy": policy.New})
 }
 
 func DelPolicy(c *gin.Context) {
 	var policy Policy
 	if err := c.ShouldBindJSON(&policy); err != nil {
-		log.Error().Err(err).Msg("ShouldBindJSON")
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Check policy input failed"})
+		c.Error(errors.New("Check policy input failed"))
 		return
 	}
 
 	e, _ := models.GetEnforcer()
 	if ok, err := e.RemovePolicy(policy.Sub, policy.Obj, policy.Act); !ok || err != nil {
-		log.Error().Err(err).Msg("RemovePolicy")
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Remove policy failed"})
+		c.Error(errors.New("Remove policy failed"))
 		return
 	}
 

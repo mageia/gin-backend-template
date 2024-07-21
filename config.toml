@@ -1,3 +1,4 @@
+listen_host = "127.0.0.1"
 listen_port = 9999
 
 [auth]
@@ -8,11 +9,6 @@ token_expire = 86400
 level = "info"
 
 [db]
-# sqlite
 url = "sqlite://test.db"
-
-# postgres
 # url = "postgres://postgres:postgres@192.168.16.110:5432/postgres"
-
-# mysql
 # url = "root:root@tcp(192.168.16.110:3306)/test"
