@@ -3,14 +3,17 @@ package middleware
 import "github.com/gin-gonic/gin"
 
 type baseErrorResponse struct {
-	Error string `json:"error"`
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
 }
 
-func ErrProcessor(c *gin.Context) {
-	c.Next()
+func ErrorHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
 
-	if len(c.Errors) != 0 {
-		c.AbortWithStatusJSON(400, baseErrorResponse{c.Errors.String()})
-		return
+		if len(c.Errors) != 0 {
+			c.AbortWithStatusJSON(400, baseErrorResponse{400, c.Errors.Last().Error()})
+			return
+		}
 	}
 }

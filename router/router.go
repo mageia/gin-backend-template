@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gin-contrib/cors"
-	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -30,8 +29,7 @@ func InitRouter() *gin.Engine {
 	r.Use(cors.Default())
 	r.Use(gin.Recovery())
 	r.Use(middleware.RequestId())
-	r.Use(middleware.ErrProcessor)
-	r.Use(gzip.Gzip(gzip.DefaultCompression))
+	r.Use(middleware.ErrorHandler())
 
 	r.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
