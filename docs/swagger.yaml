@@ -1,4 +1,49 @@
 definitions:
+  controller.Policy:
+    properties:
+      act:
+        type: string
+      obj:
+        type: string
+      sub:
+        type: string
+    required:
+    - act
+    - obj
+    - sub
+    type: object
+  controller.ReqUpdatePolicy:
+    properties:
+      new:
+        $ref: '#/definitions/controller.Policy'
+      old:
+        $ref: '#/definitions/controller.Policy'
+    required:
+    - new
+    - old
+    type: object
+  controller.UpdateUserInput:
+    properties:
+      avatar:
+        type: string
+    type: object
+  models.User:
+    properties:
+      avatar:
+        type: string
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      role:
+        type: string
+      updatedAt:
+        type: string
+      username:
+        type: string
+    type: object
   schema.ReqLogin:
     properties:
       password:
@@ -28,11 +73,6 @@ definitions:
       access_token:
         type: string
     type: object
-  schema.ResLogout:
-    properties:
-      message:
-        type: string
-    type: object
   schema.ResRegister:
     properties:
       message:
@@ -41,51 +81,141 @@ definitions:
 info:
   contact: {}
 paths:
+  /admin/policies:
+    delete:
+      description: 删除指定的访问控制策略
+      parameters:
+      - description: 要删除的策略信息
+        in: body
+        name: policy
+        required: true
+        schema:
+          $ref: '#/definitions/controller.Policy'
+      responses:
+        "204":
+          description: 删除成功
+      summary: 删除策略
+      tags:
+      - Admin/Policy
+    get:
+      description: 获取系统中所有的访问控制策略
+      responses:
+        "200":
+          description: 策略列表
+          schema:
+            items:
+              items:
+                type: string
+              type: array
+            type: array
+        "500":
+          description: 获取策略失败
+          schema:
+            type: string
+      summary: 获取所有策略
+      tags:
+      - Admin/Policy
+    post:
+      description: 添加新的访问控制策略
+      parameters:
+      - description: 新策略信息
+        in: body
+        name: policy
+        required: true
+        schema:
+          $ref: '#/definitions/controller.Policy'
+      responses: {}
+      summary: 添加新策略
+      tags:
+      - Admin/Policy
+    put:
+      description: 更新现有的访问控制策略
+      parameters:
+      - description: 策略更新信息
+        in: body
+        name: policyUpdate
+        required: true
+        schema:
+          $ref: '#/definitions/controller.ReqUpdatePolicy'
+      responses:
+        "200":
+          description: 更新后的策略
+          schema:
+            $ref: '#/definitions/controller.Policy'
+      summary: 更新策略
+      tags:
+      - Admin/Policy
+  /admin/user:
+    get:
+      description: 获取当前登录用户的详细信息
+      responses:
+        "200":
+          description: 用户信息
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: 获取当前用户信息
+      tags:
+      - Admin/User
+    put:
+      description: 更新当前登录用户的信息
+      parameters:
+      - description: 用户更新信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/controller.UpdateUserInput'
+      responses:
+        "200":
+          description: 更新后的用户信息
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: 更新当前用户信息
+      tags:
+      - Admin/User
   /auth/login:
     post:
-      description: User Login
+      description: 处理用户登录请求，验证凭据并返回访问令牌
       parameters:
-      - description: User Login
+      - description: 用户登录凭据
         in: body
-        name: schema.ReqLogin
+        name: credentials
         required: true
         schema:
           $ref: '#/definitions/schema.ReqLogin'
       responses:
         "200":
-          description: OK
+          description: 登录成功，返回访问令牌
           schema:
             $ref: '#/definitions/schema.ResLogin'
-      summary: Login
+      summary: 用户登录
       tags:
       - Auth
   /auth/logout:
     post:
-      description: User Logout
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/schema.ResLogout'
-      summary: Logout
+      description: 处理用户登出请求，使当前会话失效
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: 用户登出
       tags:
       - Auth
   /auth/register:
     post:
-      description: User Register
+      description: 处理用户注册请求，创建新用户账户
       parameters:
-      - description: User Register
+      - description: 用户注册信息
         in: body
-        name: schema.ReqRegister
+        name: user
         required: true
         schema:
           $ref: '#/definitions/schema.ReqRegister'
       responses:
         "200":
-          description: OK
+          description: 注册成功
           schema:
             $ref: '#/definitions/schema.ResRegister'
-      summary: Register
+      summary: 用户注册
       tags:
       - Auth
 swagger: "2.0"

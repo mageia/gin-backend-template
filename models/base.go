@@ -4,6 +4,7 @@ import (
 	"api-server/config"
 	"net/url"
 	"path"
+	"time"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
@@ -84,15 +85,27 @@ func init() {
 
 	DB, err = gorm.Open(dialector, &gorm.Config{})
 	if err != nil {
-		log.Fatal().Err(err).Msg("gorm.Open")
+		log.Fatal().Err(err).Msg("Failed to connect to database")
 	}
 
-	go func() {
-		if err = DB.AutoMigrate(&User{}); err != nil {
-			log.Error().Err(err).Msg("AutoMigrate")
-		}
-		InitData()
-	}()
+	sqlDB, err := DB.DB()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to get database connection")
+	}
+
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+
+	if err = sqlDB.Ping(); err != nil {
+		log.Fatal().Err(err).Msg("Failed to ping database")
+	}
+
+	if err = DB.AutoMigrate(&User{}); err != nil {
+		log.Error().Err(err).Msg("Failed to auto migrate database")
+	}
+
+	InitData()
 }
 
 func InitData() {

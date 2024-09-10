@@ -4,17 +4,157 @@
         "contact": {}
     },
     "paths": {
+        "/admin/policies": {
+            "get": {
+                "description": "获取系统中所有的访问控制策略",
+                "tags": [
+                    "Admin/Policy"
+                ],
+                "summary": "获取所有策略",
+                "responses": {
+                    "200": {
+                        "description": "策略列表",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "获取策略失败",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "更新现有的访问控制策略",
+                "tags": [
+                    "Admin/Policy"
+                ],
+                "summary": "更新策略",
+                "parameters": [
+                    {
+                        "description": "策略更新信息",
+                        "name": "policyUpdate",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.ReqUpdatePolicy"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新后的策略",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Policy"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "添加新的访问控制策略",
+                "tags": [
+                    "Admin/Policy"
+                ],
+                "summary": "添加新策略",
+                "parameters": [
+                    {
+                        "description": "新策略信息",
+                        "name": "policy",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.Policy"
+                        }
+                    }
+                ],
+                "responses": {}
+            },
+            "delete": {
+                "description": "删除指定的访问控制策略",
+                "tags": [
+                    "Admin/Policy"
+                ],
+                "summary": "删除策略",
+                "parameters": [
+                    {
+                        "description": "要删除的策略信息",
+                        "name": "policy",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.Policy"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "删除成功"
+                    }
+                }
+            }
+        },
+        "/admin/user": {
+            "get": {
+                "description": "获取当前登录用户的详细信息",
+                "tags": [
+                    "Admin/User"
+                ],
+                "summary": "获取当前用户信息",
+                "responses": {
+                    "200": {
+                        "description": "用户信息",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "更新当前登录用户的信息",
+                "tags": [
+                    "Admin/User"
+                ],
+                "summary": "更新当前用户信息",
+                "parameters": [
+                    {
+                        "description": "用户更新信息",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.UpdateUserInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新后的用户信息",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
-                "description": "User Login",
+                "description": "处理用户登录请求，验证凭据并返回访问令牌",
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Login",
+                "summary": "用户登录",
                 "parameters": [
                     {
-                        "description": "User Login",
-                        "name": "schema.ReqLogin",
+                        "description": "用户登录凭据",
+                        "name": "credentials",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -24,7 +164,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "登录成功，返回访问令牌",
                         "schema": {
                             "$ref": "#/definitions/schema.ResLogin"
                         }
@@ -34,32 +174,30 @@
         },
         "/auth/logout": {
             "post": {
-                "description": "User Logout",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "处理用户登出请求，使当前会话失效",
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Logout",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/schema.ResLogout"
-                        }
-                    }
-                }
+                "summary": "用户登出",
+                "responses": {}
             }
         },
         "/auth/register": {
             "post": {
-                "description": "User Register",
+                "description": "处理用户注册请求，创建新用户账户",
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Register",
+                "summary": "用户注册",
                 "parameters": [
                     {
-                        "description": "User Register",
-                        "name": "schema.ReqRegister",
+                        "description": "用户注册信息",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -69,7 +207,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "注册成功",
                         "schema": {
                             "$ref": "#/definitions/schema.ResRegister"
                         }
@@ -79,6 +217,74 @@
         }
     },
     "definitions": {
+        "controller.Policy": {
+            "type": "object",
+            "required": [
+                "act",
+                "obj",
+                "sub"
+            ],
+            "properties": {
+                "act": {
+                    "type": "string"
+                },
+                "obj": {
+                    "type": "string"
+                },
+                "sub": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.ReqUpdatePolicy": {
+            "type": "object",
+            "required": [
+                "new",
+                "old"
+            ],
+            "properties": {
+                "new": {
+                    "$ref": "#/definitions/controller.Policy"
+                },
+                "old": {
+                    "$ref": "#/definitions/controller.Policy"
+                }
+            }
+        },
+        "controller.UpdateUserInput": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.User": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "schema.ReqLogin": {
             "type": "object",
             "required": [
@@ -117,14 +323,6 @@
             "type": "object",
             "properties": {
                 "access_token": {
-                    "type": "string"
-                }
-            }
-        },
-        "schema.ResLogout": {
-            "type": "object",
-            "properties": {
-                "message": {
                     "type": "string"
                 }
             }

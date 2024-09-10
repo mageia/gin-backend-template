@@ -57,22 +57,22 @@ func InitRouter() *gin.Engine {
 
 	r.GET("/healthz", func(c *gin.Context) { c.String(200, "ok") })
 
-	api := r.Group("/api/v1")
+	v1 := r.Group("/api/v1")
 
-	auth := api.Group("/auth")
-	auth.POST("/login", controller.Login)
-	auth.POST("/register", controller.Register)
-	auth.POST("/logout", middleware.JwtAuth(e), controller.Logout)
+	auth := v1.Group("/auth")
+	auth.POST("/login", controller.AuthLogin)
+	auth.POST("/register", controller.AuthRegister)
+	auth.POST("/logout", middleware.JwtAuth(e), controller.AuthLogout)
 
-	admin := api.Group("/admin")
+	admin := v1.Group("/admin")
 	admin.Use(middleware.JwtAuth(e))
 	admin.GET("/user", controller.RetrieveCurrentUser)
 	admin.PUT("/user", controller.UpdateCurrentUser)
 
 	admin.POST("/policies", controller.PostPolicy)
-	admin.GET("/policies", controller.GetPolicy)
-	admin.PUT("/policies", controller.PutPolicy)
-	admin.DELETE("/policies", controller.DelPolicy)
+	admin.GET("/policies", controller.GetPolicies)
+	admin.PUT("/policies", controller.UpdatePolicy)
+	admin.DELETE("/policies", controller.DeletePolicy)
 
 	return r
 }
